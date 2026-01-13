@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: bagisto_app
+    restart: always
+    volumes:
+      - ./:/var/www
+    env_file:
+      - .env
+    extra_hosts:
+     - "host.docker.internal:host-gateway"
+
+    networks:
+      - bagisto_net
+
+  web:
+    image: nginx:1.25-alpine
+    container_name: bagisto_nginx
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - bagisto_net
+
+networks:
+  bagisto_net:
+    driver: bridge
